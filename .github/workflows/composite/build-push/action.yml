@@ -24,6 +24,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+  - name: Display Docker version
+    run: docker version
+    shell: bash
+      
   - name: Enable experimental features for the Docker daemon and CLI
     shell: bash
     run: |
