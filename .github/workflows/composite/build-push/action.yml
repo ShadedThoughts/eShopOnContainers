@@ -20,72 +20,70 @@ inputs:
   registry_password:
     description: "Registry password"
     required: true
+  
+runs:
+  using: "composite"
+  steps:
+  - name: Display Docker version
+    run: docker version
+    shell: bash
+      
+  - name: Enable experimental features for the Docker daemon and CLI
+    shell: bash
+    run: |
+        echo $'{\n  "experimental": true\n}' | sudo tee /etc/docker/daemon.json
+        mkdir -p ~/.docker
+        echo $'{\n  "experimental": "enabled"\n}' | sudo tee ~/.docker/config.json
+        sudo service docker restart
 
-jobs:
-  enable-docker-experimental-features:
-    runs-on: ubuntu-latest
-    using: "composite"
-    steps:
-    - name: Display Docker version
-      run: docker version
-      shell: bash
-        
-    - name: Enable experimental features for the Docker daemon and CLI
-      shell: bash
-      run: |
-          echo $'{\n  "experimental": true\n}' | sudo tee /etc/docker/daemon.json
-          mkdir -p ~/.docker
-          echo $'{\n  "experimental": "enabled"\n}' | sudo tee ~/.docker/config.json
-          sudo service docker restart
-  
-    - name: Check Docker version and experimental features
-      shell: bash
-      run: |
-          docker version
-          docker version --format 'Client: {{.Client.Version}} Server: {{.Server.Version}}'
-          
-    - name: Login to Container Registry
-      uses: docker/login-action@v1
-      with:
-        registry: ${{ inputs.registry_host }}
-        username: ${{ inputs.registry_username }}
-        password: ${{ inputs.registry_password }}
-  
-    - name: Set branch name as env variable
-      run: |
-        currentbranch=$(echo ${GITHUB_REF##*/})
-        echo "running on $currentbranch"
-        echo "BRANCH=$currentbranch" >> $GITHUB_ENV
-      shell: bash
-  
-    - name: Compose build ${{ inputs.service }}
-      shell: bash
-      run: sudo -E docker-compose build ${{ inputs.service }}
-      working-directory: ./src
-      env:
-        TAG: ${{ env.BRANCH }}
-        REGISTRY: ${{ inputs.registry_endpoint }}
-  
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: '${{ inputs.registry_endpoint }}/${{ env.IMAGE }}:linux-${{ env.BRANCH }}'
-        format: 'table'
-        ignore-unfixed: true
-        exit-code: '1'
-        vuln-type: 'os,library'
-        severity: 'CRITICAL,HIGH'   
-  
-    - name: Compose push ${{ inputs.service }}
-      shell: bash
-      run: sudo -E docker-compose push ${{ inputs.service }}
-      working-directory: ./src
-      env:
-        TAG: ${{ env.BRANCH }}
-        REGISTRY: ${{ inputs.registry_endpoint }}
-  
-    - name: Create multiarch manifest
-      shell: bash
-      run: |
-        docker --config ~/.docker manifest create ${{ inputs.registry_endpoint  }}/${{ inputs.image_name }}:${{ env.BRANCH  }} ${{ inputs.registry_endpoint  }}/${{ inputs.image_name  }}:linux-${{ env.BRANCH  }}
-        docker --config ~/.docker manifest push ${{ inputs.registry_endpoint  }}/${{ inputs.image_name }}:${{ env.BRANCH  }}
+  - name: Check Docker version and experimental features
+    shell: bash
+    run: |
+        docker version
+        docker version --format 'Client: {{.Client.Version}} Server: {{.Server.Version}}'
+
+  - name: Login to Container Registry
+    uses: docker/login-action@v1
+    with:
+      registry: ${{ inputs.registry_host }}
+      username: ${{ inputs.registry_username }}
+      password: ${{ inputs.registry_password }}
+
+  - name: Set branch name as env variable
+    run: |
+      currentbranch=$(echo ${GITHUB_REF##*/})
+      echo "running on $currentbranch"
+      echo "BRANCH=$currentbranch" >> $GITHUB_ENV
+    shell: bash
+
+  - name: Compose build ${{ inputs.service }}
+    shell: bash
+    run: sudo -E docker-compose build ${{ inputs.service }}
+    working-directory: ./src
+    env:
+      TAG: ${{ env.BRANCH }}
+      REGISTRY: ${{ inputs.registry_endpoint }}
+
+  - name: Run Trivy vulnerability scanner
+    uses: aquasecurity/trivy-action@master
+    with:
+      image-ref: '${{ inputs.registry_endpoint }}/${{ env.IMAGE }}:linux-${{ env.BRANCH }}'
+      format: 'table'
+      ignore-unfixed: true
+      exit-code: '1'
+      vuln-type: 'os,library'
+      severity: 'CRITICAL,HIGH'   
+
+  - name: Compose push ${{ inputs.service }}
+    shell: bash
+    run: sudo -E docker-compose push ${{ inputs.service }}
+    working-directory: ./src
+    env:
+      TAG: ${{ env.BRANCH }}
+      REGISTRY: ${{ inputs.registry_endpoint }}
+
+  - name: Create multiarch manifest
+    shell: bash
+    run: |
+      docker --config ~/.docker manifest create ${{ inputs.registry_endpoint  }}/${{ inputs.image_name }}:${{ env.BRANCH  }} ${{ inputs.registry_endpoint  }}/${{ inputs.image_name  }}:linux-${{ env.BRANCH  }}
+      docker --config ~/.docker manifest push ${{ inputs.registry_endpoint  }}/${{ inputs.image_name }}:${{ env.BRANCH  }}
