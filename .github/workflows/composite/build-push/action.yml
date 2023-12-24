@@ -37,6 +37,7 @@ runs:
         sudo service docker restart
 
   - name: Check Docker version and experimental features
+    shell: bash
     run: |
         docker version
         docker version --format '{{.Client.Experimental}}'
