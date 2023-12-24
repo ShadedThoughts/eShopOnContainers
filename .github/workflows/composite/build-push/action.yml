@@ -35,6 +35,10 @@ runs:
         mkdir -p ~/.docker
         echo $'{\n  "experimental": "enabled"\n}' | sudo tee ~/.docker/config.json
         sudo service docker restart
+
+  - name: Check Docker version and experimental features
+    run: |
+        docker version
         docker version --format '{{.Client.Experimental}}'
         docker version --format '{{.Server.Experimental}}'
 
