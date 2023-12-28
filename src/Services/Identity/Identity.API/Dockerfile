@@ -25,6 +25,7 @@ COPY "Services/Catalog/Catalog.API/Catalog.API.csproj" "Services/Catalog/Catalog
 COPY "Services/Catalog/Catalog.FunctionalTests/Catalog.FunctionalTests.csproj" "Services/Catalog/Catalog.FunctionalTests/Catalog.FunctionalTests.csproj"
 COPY "Services/Catalog/Catalog.UnitTests/Catalog.UnitTests.csproj" "Services/Catalog/Catalog.UnitTests/Catalog.UnitTests.csproj"
 COPY "Services/Identity/Identity.API/Identity.API.csproj" "Services/Identity/Identity.API/Identity.API.csproj"
+COPY "Services/Identity/Identity.API/libman.json" "Services/Identity/Identity.API/libman.json"
 COPY "Services/Ordering/Ordering.API/Ordering.API.csproj" "Services/Ordering/Ordering.API/Ordering.API.csproj"
 COPY "Services/Ordering/Ordering.BackgroundTasks/Ordering.BackgroundTasks.csproj" "Services/Ordering/Ordering.BackgroundTasks/Ordering.BackgroundTasks.csproj"
 COPY "Services/Ordering/Ordering.Domain/Ordering.Domain.csproj" "Services/Ordering/Ordering.Domain/Ordering.Domain.csproj"
@@ -46,7 +47,7 @@ COPY "NuGet.config" "NuGet.config"
 
 RUN dotnet restore "eShopOnContainers-ServicesAndWebApps.sln"
 
-RUN dotnet restore
+RUN dotnet restore "libman.json"
 
 COPY . .
 WORKDIR /src/Services/Identity/Identity.API
