@@ -45,14 +45,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - uses: ./.github/workflows/composite/build-push
-      with:
-        service: ${{ env.SERVICE }}
-        registry_host: ${{ secrets.REGISTRY_HOST }}
-        registry_endpoint: ${{ secrets.REGISTRY_ENDPOINT }}
-        image_name: ${{ env.IMAGE }}
-        registry_username: ${{ secrets.USERNAME }}
-        registry_password: ${{ secrets.PASSWORD }}
+    # - uses: ./.github/workflows/composite/build-push
+    #   with:
+    #     service: ${{ env.SERVICE }}
+    #     registry_host: ${{ secrets.REGISTRY_HOST }}
+    #     registry_endpoint: ${{ secrets.REGISTRY_ENDPOINT }}
+    #     image_name: ${{ env.IMAGE }}
+    #     registry_username: ${{ secrets.USERNAME }}
+    #     registry_password: ${{ secrets.PASSWORD }}
     
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v1
@@ -82,11 +82,11 @@ jobs:
         dotnet libman restore
         dotnet libman cache
 
-    # - uses: ./.github/workflows/composite/build-push
-    #   with:
-    #     service: ${{ env.SERVICE }}
-    #     registry_host: ${{ secrets.REGISTRY_HOST }}
-    #     registry_endpoint: ${{ secrets.REGISTRY_ENDPOINT }}
-    #     image_name: ${{ env.IMAGE }}
-    #     registry_username: ${{ secrets.USERNAME }}
-    #     registry_password: ${{ secrets.PASSWORD }}
+    - uses: ./.github/workflows/composite/build-push
+      with:
+        service: ${{ env.SERVICE }}
+        registry_host: ${{ secrets.REGISTRY_HOST }}
+        registry_endpoint: ${{ secrets.REGISTRY_ENDPOINT }}
+        image_name: ${{ env.IMAGE }}
+        registry_username: ${{ secrets.USERNAME }}
+        registry_password: ${{ secrets.PASSWORD }}
