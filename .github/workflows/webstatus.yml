@@ -39,28 +39,13 @@ jobs:
         service: ${{ env.SERVICE }}
         registry_endpoint: ${{ secrets.REGISTRY_ENDPOINT }}
 
+
   BuildLinux:
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    
-    - name: Install LibMan CLI
-      shell: bash
-      run: dotnet tool install -g Microsoft.Web.LibraryManager.Cli
-
-    - name: Navigate to the folder with libman.json
-      shell: bash
-      run: cd src/Web/WebStatus/
-
-    - name: Run LibMan Cache
-      shell: bash
-      run: dotnet libman cache
-
-    - name: Run LibMan Restore
-      shell: bash
-      run: dotnet libman restore
 
     - uses: ./.github/workflows/composite/build-push
       with:
@@ -70,3 +55,63 @@ jobs:
         image_name: ${{ env.IMAGE }}
         registry_username: ${{ secrets.USERNAME }}
         registry_password: ${{ secrets.PASSWORD }}
+    
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0' 
+    
+    - name: Install LibMan CLI
+      shell: bash
+      run: dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+
+    - name: Display LibMan CLI version
+      run: dotnet libman --version
+
+    - name: Navigate to the folder with libman.json
+      shell: bash
+      run: cd src/Web/WebStatus/
+
+    - name: Display Working Directory and PATH
+      shell: bash
+      run: |
+        pwd
+        echo $PATH
+
+    - name: Run LibMan Cache and Restore
+      shell: bash
+      run: |
+        dotnet libman restore
+        dotnet libman cache
+
+  # BuildLinux:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.event_name != 'pull_request' }}
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v2
+    
+  #   - name: Install LibMan CLI
+  #     shell: bash
+  #     run: dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+
+  #   - name: Navigate to the folder with libman.json
+  #     shell: bash
+  #     run: cd src/Web/WebStatus/
+
+  #   - name: Run LibMan Cache
+  #     shell: bash
+  #     run: dotnet libman cache
+
+  #   - name: Run LibMan Restore
+  #     shell: bash
+  #     run: dotnet libman restore
+
+  #   - uses: ./.github/workflows/composite/build-push
+  #     with:
+  #       service: ${{ env.SERVICE }}
+  #       registry_host: ${{ secrets.REGISTRY_HOST }}
+  #       registry_endpoint: ${{ secrets.REGISTRY_ENDPOINT }}
+  #       image_name: ${{ env.IMAGE }}
+  #       registry_username: ${{ secrets.USERNAME }}
+  #       registry_password: ${{ secrets.PASSWORD }}
