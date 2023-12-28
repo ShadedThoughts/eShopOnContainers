@@ -46,6 +46,8 @@ COPY "NuGet.config" "NuGet.config"
 
 RUN dotnet restore "eShopOnContainers-ServicesAndWebApps.sln"
 
+RUN dotnet restore
+
 COPY . .
 WORKDIR /src/Services/Identity/Identity.API
 RUN dotnet publish --no-restore -c Release -o /app
